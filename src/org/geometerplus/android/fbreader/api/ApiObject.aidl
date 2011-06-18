@@ -19,8 +19,4 @@
 
 package org.geometerplus.android.fbreader.api;
 
-import org.geometerplus.android.fbreader.api.ApiObject;
-
-interface ApiInterface {
-	ApiObject request(int method, in ApiObject[] parameters);
-}
+parcelable ApiObject;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2011 Geometer Plus <contact@geometerplus.com>
+ * Copyright (C) 2009-2011 Geometer Plus <contact@geometerplus.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,4 +19,29 @@
 
 package org.geometerplus.android.fbreader.api;
 
-parcelable TextPosition;
+interface ApiMethods {
+	// program information
+
+	// library information
+
+	// network library information
+
+	// bookmarks information
+
+	// preferences
+
+	// book information
+	int GET_BOOK_LANGUAGE = 501;
+
+	// text information
+	int GET_PARAGRAPHS_NUMBER = 601;
+	int GET_ELEMENTS_NUMBER = 602;
+	int GET_PARAGRAPH_TEXT = 603;
+
+	// page information
+	int GET_PAGE_START = 701;
+	int GET_PAGE_END = 702;
+
+	// view change
+	int SET_PAGE_START = 801;
+}
