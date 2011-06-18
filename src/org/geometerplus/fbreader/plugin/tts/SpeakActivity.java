@@ -202,7 +202,9 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		String s = lookForValidParagraphString(direction);
 
 		try {
-			myApi.setPageStart(new TextPosition(myParagraphIndex, 0, 0));
+			if (!myApi.isPageEndOfText()) {
+				myApi.setPageStart(new TextPosition(myParagraphIndex, 0, 0));
+			}
 		} catch (ApiException e) {
 			e.printStackTrace();
 		}
