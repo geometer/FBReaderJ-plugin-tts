@@ -215,7 +215,6 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 	@Override
 	protected void onDestroy() {
-		//myReader.onWindowClosing(); // save the position
 		setActive(false);
 		if (myTTS != null) {
 			myTTS.shutdown();
@@ -234,7 +233,6 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 	@Override
 	protected void onPause() {
-		//myReader.onWindowClosing(); // save the position
 		super.onPause();
 	}
 
