@@ -231,9 +231,14 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	@Override
 	protected void onPause() {
 		//myReader.onWindowClosing(); // save the position
+		super.onPause();
+	}
+
+	@Override
+	protected void onStop() {
 		stopTalking();
 		myConnection.disconnect();
-		super.onPause();
+		super.onStop();
 	}
 
 	@Override
