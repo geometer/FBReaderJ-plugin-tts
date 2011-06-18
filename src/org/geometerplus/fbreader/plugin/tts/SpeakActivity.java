@@ -16,7 +16,7 @@ import android.widget.ImageButton;
 import org.geometerplus.android.fbreader.api.*;
 
 public class SpeakActivity extends Activity implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
-	private ApiServiceConnection myConnection;
+	private Api myApi;
 
 	private static final int CHECK_TTS_INSTALLED = 0;
 	private static final String PARAGRAPHUTTERANCE = "PARAGRAPHUTTERANCE";
@@ -93,7 +93,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		myConnection = new ApiServiceConnection(this);
+		myApi = new ApiServiceConnection(this);
 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.view_spokentext);
@@ -117,7 +117,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 	@Override
 	protected void onResume() {
-		myConnection.connect();
+		myApi.connect();
 		super.onResume();
 	}
 
@@ -132,8 +132,8 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 					System.err.println("en_UK " + myTTS.isLanguageAvailable(new Locale("en_UK")));
 					System.err.println("ru " + myTTS.isLanguageAvailable(new Locale("ru")));
 					System.err.println("fr " + myTTS.isLanguageAvailable(new Locale("fr")));
-					System.err.println(myConnection.getBookLanguage());
-					myTTS.setLanguage(new Locale(myConnection.getBookLanguage()));
+					System.err.println(myApi.getBookLanguage());
+					myTTS.setLanguage(new Locale(myApi.getBookLanguage()));
 				} catch (ApiException e) {
 				}
 			} else {
@@ -148,7 +148,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 	private String getParagraphText(int paragraphIndex) {
 		try {
-			return myConnection.getParagraphText(paragraphIndex);
+			return myApi.getParagraphText(paragraphIndex);
 		} catch (ApiException e) {
 			return "";
 		}
@@ -157,8 +157,8 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	private void setActive(boolean active) {
 		if (active && myParagraphIndex == -1) {
 			try {
-				myParagraphIndex = myConnection.getPageStart().ParagraphIndex;
-				myParagraphsNumber = myConnection.getParagraphsNumber();
+				myParagraphIndex = myApi.getPageStart().ParagraphIndex;
+				myParagraphsNumber = myApi.getParagraphsNumber();
 			} catch (ApiException e) {
 			}
 			active = myParagraphIndex != -1;
@@ -212,7 +212,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		String s = lookForValidParagraphString(direction);
 
 		try {
-			myConnection.setPageStart(new TextPosition(myParagraphIndex, 0, 0));
+			myApi.setPageStart(new TextPosition(myParagraphIndex, 0, 0));
 		} catch (ApiException e) {
 		}
 		if (speak) {
@@ -248,7 +248,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	@Override
 	protected void onStop() {
 		stopTalking();
-		myConnection.disconnect();
+		myApi.disconnect();
 		super.onStop();
 	}
 
