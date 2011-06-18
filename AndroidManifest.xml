@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.geometerplus.fbreader.plugin.tts" android:versionCode="9900" android:versionName="0.99" android:installLocation="auto">
+	<uses-sdk android:minSdkVersion="4" />
+	<supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:anyDensity="true" />
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
+	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+	<application android:label="FBReader TTS plugin" android:icon="@drawable/fbreader_plugin">
+		<activity android:name="org.geometerplus.fbreader.plugin.tts.TestActivity" android:theme="@android:style/Theme.NoDisplay">
+			<intent-filter>
+				<action android:name="android.fbreader.action.plugin.REGISTER" />
+				<category android:name="android.intent.category.DEFAULT" />
+			</intent-filter>
+		</activity>
+		<activity android:name="org.geometerplus.fbreader.plugin.tts.SpeakActivity" android:configChanges="orientation|keyboardHidden" android:theme="@android:style/Theme.Dialog">
+			<intent-filter>
+				<action android:name="android.fbreader.action.plugin.RUN" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:host="data.fbreader.org" android:scheme="http" android:path="/plugin/tts/speak" />
+			</intent-filter>
+		</activity>
+	</application>
+</manifest>
