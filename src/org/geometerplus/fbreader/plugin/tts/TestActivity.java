@@ -31,7 +31,7 @@ public class TestActivity extends PluginApi.TestActivity {
 	protected List<PluginApi.ActionInfo> implementedActions() {
 		return Collections.singletonList(new PluginApi.ActionInfo(
 			Uri.parse("http://data.fbreader.org/plugin/tts/speak"),
-			"Speak"
+			getText(R.string.speak_menu_item).toString()
 		));
 	}
 }
