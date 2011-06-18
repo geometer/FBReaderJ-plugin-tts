@@ -11,7 +11,6 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.view.View;
 import android.view.Window;
-import android.widget.ImageButton;
 
 import org.geometerplus.android.fbreader.api.*;
 
@@ -29,21 +28,8 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 	private int myParagraphIndex = -1;
 	private int myParagraphsNumber;
-	private ImageButton myPauseButton;
 
 	private boolean myIsActive = false;
-
-	private class UpdateControls implements Runnable {
-		private final int myImageResourceId;
-
-		public UpdateControls(int resourceId) {
-			myImageResourceId = resourceId;
-		}
-
-		public void run() {
-			myPauseButton.setImageResource(myImageResourceId);
-		}
-	}
 
 	private PhoneStateListener mPhoneListener = new PhoneStateListener() {
 		public void onCallStateChanged(int state, String incomingNumber) {
@@ -70,15 +56,8 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 	private View.OnClickListener pauseListener = new View.OnClickListener() {
 		public void onClick(View v) {
-			if (myIsActive) {
-				stopTalking();
-				myIsActive = false;
-			} else {
-				setActive(true);
-				if (myIsActive) {
-					nextParagraphString(true, CURRENTORFORWARD);
-				}
-			}
+			stopTalking();
+			myIsActive = false;
 		}
 	};
 
@@ -89,6 +68,10 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		}
 	};
 
+	private void setListener(int id, View.OnClickListener listener) {
+		findViewById(id).setOnClickListener(listener);
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -96,14 +79,20 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		myApi = new ApiServiceConnection(this);
 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.view_spokentext);
+		setContentView(R.layout.control_panel);
 
-		((ImageButton)findViewById(R.id.spokentextback)).setOnClickListener(backListener);
-		((ImageButton)findViewById(R.id.spokentextforward)).setOnClickListener(forwardListener);
-		((ImageButton)findViewById(R.id.spokentextstop)).setOnClickListener(stopListener);
-
-		myPauseButton = (ImageButton)findViewById(R.id.spokentextpause);
-		myPauseButton.setOnClickListener(pauseListener);
+		findViewById(R.id.button_previous_paragraph).setOnClickListener(backListener);
+		findViewById(R.id.button_next_paragraph).setOnClickListener(forwardListener);
+		findViewById(R.id.button_close).setOnClickListener(stopListener);
+		findViewById(R.id.button_pause).setOnClickListener(pauseListener);
+		findViewById(R.id.button_play).setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				setActive(true);
+				if (myIsActive) {
+					nextParagraphString(true, CURRENTORFORWARD);
+				}
+			}
+		});
 
 		setActive(false);
 
@@ -158,11 +147,12 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 		myIsActive = active;
 
-		if (myIsActive) {
-			myPauseButton.post(new UpdateControls(R.drawable.speak_pause));
-		} else {
-			myPauseButton.post(new UpdateControls(R.drawable.speak_play));
-		}
+		runOnUiThread(new Runnable() {
+			public void run() {
+				findViewById(R.id.button_play).setVisibility(myIsActive ? View.GONE : View.VISIBLE);
+				findViewById(R.id.button_pause).setVisibility(myIsActive ? View.VISIBLE : View.GONE);
+			}
+		});
 	}
 
 	private void speakString(String s) {
