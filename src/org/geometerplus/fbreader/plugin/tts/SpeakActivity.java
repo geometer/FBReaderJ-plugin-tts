@@ -1,6 +1,7 @@
 package org.geometerplus.fbreader.plugin.tts;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -125,6 +126,16 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 			if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
 				// success, create the TTS instance
 				myTTS = new TextToSpeech(this, this);
+				try {
+					System.err.println("en " + myTTS.isLanguageAvailable(new Locale("en")));
+					System.err.println("en " + myTTS.isLanguageAvailable(Locale.ENGLISH));
+					System.err.println("en_UK " + myTTS.isLanguageAvailable(new Locale("en_UK")));
+					System.err.println("ru " + myTTS.isLanguageAvailable(new Locale("ru")));
+					System.err.println("fr " + myTTS.isLanguageAvailable(new Locale("fr")));
+					System.err.println(myConnection.getBookLanguage());
+					myTTS.setLanguage(new Locale(myConnection.getBookLanguage()));
+				} catch (ApiException e) {
+				}
 			} else {
 				// missing data, install it
 				Intent installIntent = new Intent();
