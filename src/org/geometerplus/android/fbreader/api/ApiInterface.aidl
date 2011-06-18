@@ -23,6 +23,7 @@ import org.geometerplus.android.fbreader.api.TextPosition;
 
 interface ApiInterface {
 	int getParagraphsNumber();
+	int getElementsNumber(int paragraphIndex);
 
 	String getBookLanguage();
 
