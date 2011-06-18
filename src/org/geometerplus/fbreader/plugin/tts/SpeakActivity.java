@@ -126,16 +126,6 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 			if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
 				// success, create the TTS instance
 				myTTS = new TextToSpeech(this, this);
-				try {
-					System.err.println("en " + myTTS.isLanguageAvailable(new Locale("en")));
-					System.err.println("en " + myTTS.isLanguageAvailable(Locale.ENGLISH));
-					System.err.println("en_UK " + myTTS.isLanguageAvailable(new Locale("en_UK")));
-					System.err.println("ru " + myTTS.isLanguageAvailable(new Locale("ru")));
-					System.err.println("fr " + myTTS.isLanguageAvailable(new Locale("fr")));
-					System.err.println(myApi.getBookLanguage());
-					myTTS.setLanguage(new Locale(myApi.getBookLanguage()));
-				} catch (ApiException e) {
-				}
 			} else {
 				// missing data, install it
 				Intent installIntent = new Intent();
@@ -150,6 +140,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		try {
 			return myApi.getParagraphText(paragraphIndex);
 		} catch (ApiException e) {
+			e.printStackTrace();
 			return "";
 		}
 	}
@@ -160,6 +151,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 				myParagraphIndex = myApi.getPageStart().ParagraphIndex;
 				myParagraphsNumber = myApi.getParagraphsNumber();
 			} catch (ApiException e) {
+				e.printStackTrace();
 			}
 			active = myParagraphIndex != -1;
 		}
@@ -180,8 +172,6 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		callbackMap.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, PARAGRAPHUTTERANCE);
 
 		myTTS.speak(s, TextToSpeech.QUEUE_FLUSH, callbackMap);
-		System.err.println(myParagraphIndex);
-		System.err.println(s);
 	}
 
 	private String lookForValidParagraphString(int direction) {
@@ -214,6 +204,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		try {
 			myApi.setPageStart(new TextPosition(myParagraphIndex, 0, 0));
 		} catch (ApiException e) {
+			e.printStackTrace();
 		}
 		if (speak) {
 			speakString(s);
@@ -261,6 +252,15 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	@Override
 	public void onInit(int status) {
 		myTTS.setOnUtteranceCompletedListener(this);
+		try {
+			Locale locale = new Locale(myApi.getBookLanguage());
+			if (myTTS.isLanguageAvailable(locale) < 0) {
+				locale = Locale.getDefault();
+			}
+			myTTS.setLanguage(locale);
+		} catch (ApiException e) {
+			e.printStackTrace();
+		}
 		setActive(true);
 		nextParagraphString(true, CURRENTORFORWARD);
 	}
