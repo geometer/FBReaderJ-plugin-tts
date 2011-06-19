@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.geometerplus.fbreader.plugin.tts" android:versionCode="9900" android:versionName="0.99" android:installLocation="auto">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.geometerplus.fbreader.plugin.tts" android:versionCode="10000" android:versionName="1.0" android:installLocation="auto">
 	<uses-sdk android:minSdkVersion="4" />
 	<supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:anyDensity="true" />
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-	<application android:label="FBReader TTS plugin" android:icon="@drawable/fbreader_plugin">
+	<application android:label="@string/title" android:icon="@drawable/fbreader_plugin">
 		<activity android:name="org.geometerplus.fbreader.plugin.tts.TestActivity" android:theme="@android:style/Theme.NoDisplay">
 			<intent-filter>
 				<action android:name="android.fbreader.action.plugin.REGISTER" />
