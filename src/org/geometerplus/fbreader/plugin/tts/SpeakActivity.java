@@ -46,7 +46,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		myApi = new ApiServiceConnection(this);
+		myApi = new ApiClientImplementation(this);
 
 		setContentView(R.layout.control_panel);
 
