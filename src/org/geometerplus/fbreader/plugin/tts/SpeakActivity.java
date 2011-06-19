@@ -20,7 +20,6 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 	static final int CURRENTORFORWARD = 0;
 	static final int SEARCHFORWARD = 1;
-	static final int SEARCHBACKWARD = 2;
 
 	private TextToSpeech myTTS;
 
@@ -64,8 +63,13 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		setListener(R.id.button_previous_paragraph, new View.OnClickListener() {
 			public void onClick(View v) {
 				stopTalking();
-				lookForValidParagraphString(SEARCHBACKWARD);
 				try {
+					for (int i = myParagraphIndex - 1; i >= 0; --i) {
+						if (myApi.getParagraphText(i).length() > 0) {
+							myParagraphIndex = i;
+							break;
+						}
+					}
 					if (myApi.getPageStart().ParagraphIndex >= myParagraphIndex) {
 						myApi.setPageStart(new TextPosition(myParagraphIndex, 0, 0));
 					}
@@ -80,7 +84,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		setListener(R.id.button_next_paragraph, new View.OnClickListener() {
 			public void onClick(View v) {
 				stopTalking();
-				nextParagraphString(false, SEARCHFORWARD);
+				nextParagraphString(SEARCHFORWARD);
 			}
 		});
 		setListener(R.id.button_close, new View.OnClickListener() {
@@ -98,7 +102,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 			public void onClick(View v) {
 				setActive(true);
 				if (myIsActive) {
-					nextParagraphString(true, CURRENTORFORWARD);
+					speakString(nextParagraphString(CURRENTORFORWARD));
 				}
 			}
 		});
@@ -125,10 +129,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 			myTTS = new TextToSpeech(this, this);
 		} else {
 			// missing data, install it
-			Intent installIntent = new Intent();
-			installIntent.setAction(
-				TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-			startActivity(installIntent);
+			startActivity(new Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA));
 		}
 	}
 
@@ -155,84 +156,48 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		});
 	}
 
-	private void speakString(String s) {
+	private void speakString(String text) {
 		setActive(true);
 
 		HashMap<String, String> callbackMap = new HashMap<String, String>();
 		callbackMap.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, UTTERANCE_ID);
 
-		myTTS.speak(s, TextToSpeech.QUEUE_FLUSH, callbackMap);
+		myTTS.speak(text, TextToSpeech.QUEUE_FLUSH, callbackMap);
 	}
 
-	private boolean gotoNextParagraph() {
-		if (myParagraphIndex == -1 || myParagraphIndex == myParagraphsNumber) {
-			return false;
-		}
-		++myParagraphIndex;
-		return true;
-	}
-
-	private boolean gotoPreviousParagraph() {
-		if (myParagraphIndex == -1 || myParagraphIndex == 0) {
-			return false;
-		}
-		--myParagraphIndex;
-		return true;
-	}
-
-	private String lookForValidParagraphString(int direction) {
+	private String nextParagraphString(int direction) {
 		if (myParagraphIndex == -1) {
 			return "";
 		}
-		while (true) {
-			switch (direction) {
-				case SEARCHFORWARD:
-					if (!gotoNextParagraph()) {
-						return "";
-					}
-					break;
-				case SEARCHBACKWARD:
-					if (!gotoPreviousParagraph()) {
-						return "";
-					}
-					break;
-				case CURRENTORFORWARD:
-					direction = SEARCHFORWARD;
-					break;
-			}
-			try {
-				final String text = myApi.getParagraphText(myParagraphIndex);
-				if (text.length() > 0) {
-					return text;
-				}
-			} catch (ApiException e) {
-				e.printStackTrace();
-				return "";
-			}
-		}
-	}
-
-	private void nextParagraphString(boolean speak, int direction) {
-		String s = lookForValidParagraphString(direction);
 
 		try {
+			if (direction == SEARCHFORWARD) {
+				++myParagraphIndex;
+			}
+			String text = "";
+			for (; myParagraphIndex < myParagraphsNumber; ++myParagraphIndex) {
+				final String s = myApi.getParagraphText(myParagraphIndex);
+				if (s.length() > 0) {
+					text = s;
+					break;
+				}
+			}
 			if (!myApi.isPageEndOfText()) {
 				myApi.setPageStart(new TextPosition(myParagraphIndex, 0, 0));
 			}
 			highlightParagraph();
+			if (myParagraphIndex >= myParagraphsNumber) {
+				runOnUiThread(new Runnable() {
+					public void run() {
+						findViewById(R.id.button_next_paragraph).setEnabled(false);
+						findViewById(R.id.button_play).setEnabled(false);
+					}
+				});
+			}
+			return text;
 		} catch (ApiException e) {
 			e.printStackTrace();
-		}
-		if (myParagraphIndex >= myParagraphsNumber) {
-			runOnUiThread(new Runnable() {
-				public void run() {
-					findViewById(R.id.button_next_paragraph).setEnabled(false);
-					findViewById(R.id.button_play).setEnabled(false);
-				}
-			});
-		}
-		if (speak) {
-			speakString(s);
+			return "";
 		}
 	}
 
@@ -292,13 +257,13 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 			e.printStackTrace();
 		}
 		setActive(true);
-		nextParagraphString(true, CURRENTORFORWARD);
+		speakString(nextParagraphString(CURRENTORFORWARD));
 	}
 
 	@Override
 	public void onUtteranceCompleted(String uttId) {
 		if (myIsActive && UTTERANCE_ID.equals(uttId)) {
-			nextParagraphString(true, SEARCHFORWARD);
+			speakString(nextParagraphString(SEARCHFORWARD));
 			if (myParagraphIndex >= myParagraphsNumber) {
 				stopTalking();
 			}
