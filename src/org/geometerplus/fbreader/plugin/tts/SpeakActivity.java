@@ -16,8 +16,7 @@ import org.geometerplus.android.fbreader.api.*;
 public class SpeakActivity extends Activity implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
 	private Api myApi;
 
-	private static final int CHECK_TTS_INSTALLED = 0;
-	private static final String PARAGRAPHUTTERANCE = "PARAGRAPHUTTERANCE";
+	private static final String UTTERANCE_ID = "FBReaderTTSPlugin";
 
 	static final int CURRENTORFORWARD = 0;
 	static final int SEARCHFORWARD = 1;
@@ -54,7 +53,15 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		setListener(R.id.button_previous_paragraph, new View.OnClickListener() {
 			public void onClick(View v) {
 				stopTalking();
-				nextParagraphString(false, SEARCHBACKWARD);
+				lookForValidParagraphString(SEARCHBACKWARD);
+				try {
+					if (myApi.getPageStart().ParagraphIndex >= myParagraphIndex) {
+						myApi.setPageStart(new TextPosition(myParagraphIndex, 0, 0));
+					}
+					findViewById(R.id.button_play).setEnabled(true);
+				} catch (ApiException e) {
+					e.printStackTrace();
+				}
 			}
 		});
 		setListener(R.id.button_next_paragraph, new View.OnClickListener() {
@@ -72,7 +79,6 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		setListener(R.id.button_pause, new View.OnClickListener() {
 			public void onClick(View v) {
 				stopTalking();
-				myIsActive = false;
 			}
 		});
 		setListener(R.id.button_play, new View.OnClickListener() {
@@ -90,8 +96,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		tm.listen(mPhoneListener, PhoneStateListener.LISTEN_CALL_STATE);
 
 		startActivityForResult(
-			new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA),
-			CHECK_TTS_INSTALLED
+			new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA), 0
 		);
 	}
 
@@ -102,30 +107,19 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	}
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == CHECK_TTS_INSTALLED) {
-			if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-				// success, create the TTS instance
-				myTTS = new TextToSpeech(this, this);
-			} else {
-				// missing data, install it
-				Intent installIntent = new Intent();
-				installIntent.setAction(
-					TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-				startActivity(installIntent);
-			}
+		if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+			// success, create the TTS instance
+			myTTS = new TextToSpeech(this, this);
+		} else {
+			// missing data, install it
+			Intent installIntent = new Intent();
+			installIntent.setAction(
+				TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+			startActivity(installIntent);
 		}
 	}
 
-	private String getParagraphText(int paragraphIndex) {
-		try {
-			return myApi.getParagraphText(paragraphIndex);
-		} catch (ApiException e) {
-			e.printStackTrace();
-			return "";
-		}
-	}
-
-	private void setActive(boolean active) {
+	private void setActive(final boolean active) {
 		if (active && myParagraphIndex == -1) {
 			try {
 				myParagraphIndex = myApi.getPageStart().ParagraphIndex;
@@ -133,15 +127,17 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 			} catch (ApiException e) {
 				e.printStackTrace();
 			}
-			active = myParagraphIndex != -1;
+			if (myParagraphIndex == -1) {
+				return;
+			}
 		}
 
 		myIsActive = active;
 
 		runOnUiThread(new Runnable() {
 			public void run() {
-				findViewById(R.id.button_play).setVisibility(myIsActive ? View.GONE : View.VISIBLE);
-				findViewById(R.id.button_pause).setVisibility(myIsActive ? View.VISIBLE : View.GONE);
+				findViewById(R.id.button_play).setVisibility(active ? View.GONE : View.VISIBLE);
+				findViewById(R.id.button_pause).setVisibility(active ? View.VISIBLE : View.GONE);
 			}
 		});
 	}
@@ -150,33 +146,66 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		setActive(true);
 
 		HashMap<String, String> callbackMap = new HashMap<String, String>();
-		callbackMap.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, PARAGRAPHUTTERANCE);
+		callbackMap.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, UTTERANCE_ID);
 
 		myTTS.speak(s, TextToSpeech.QUEUE_FLUSH, callbackMap);
 	}
 
+	private boolean gotoNextParagraph() {
+		if (myParagraphIndex == -1 || myParagraphIndex == myParagraphsNumber - 1) {
+			return false;
+		}
+		++myParagraphIndex;
+		return true;
+	}
+
+	private boolean gotoPreviousParagraph() {
+		if (myParagraphIndex == -1 || myParagraphIndex == 0) {
+			return false;
+		}
+		--myParagraphIndex;
+		return true;
+	}
+
 	private String lookForValidParagraphString(int direction) {
-		String s = "";
-		while (s.equals("") && myParagraphIndex != -1) {
+		if (myParagraphIndex == -1) {
+			return "";
+		}
+		while (true) {
 			switch (direction) {
 				case SEARCHFORWARD:
-					++myParagraphIndex;
+					if (!gotoNextParagraph()) {
+						return "";
+					}
 					break;
 				case SEARCHBACKWARD:
-					--myParagraphIndex;
+					if (!gotoPreviousParagraph()) {
+						return "";
+					}
 					break;
 				case CURRENTORFORWARD:
 					direction = SEARCHFORWARD;
 					break;
 			}
-			s = getParagraphText(myParagraphIndex);
+			try {
+				final String text = myApi.getParagraphText(myParagraphIndex);
+				if (text.length() > 0) {
+					return text;
+				}
+			} catch (ApiException e) {
+				e.printStackTrace();
+				return "";
+			}
 		}
-		return s;
+	}
+
+	private void scrollToCurrentParagraph() {
 	}
 
 	private void nextParagraphString(boolean speak, int direction) {
 		if (myParagraphIndex >= myParagraphsNumber - 1) {
 			stopTalking();
+			findViewById(R.id.button_play).setEnabled(false);
 			return;
 		}
 
@@ -250,7 +279,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 	@Override
 	public void onUtteranceCompleted(String uttId) {
-		if (myIsActive && uttId.equals(PARAGRAPHUTTERANCE)) {
+		if (myIsActive && UTTERANCE_ID.equals(uttId)) {
 			nextParagraphString(true, SEARCHFORWARD);
 		} else {
 			setActive(false);
