@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="speak_menu_item">Speak</string>
+	<string name="close_button">Close</string>
 </resources>

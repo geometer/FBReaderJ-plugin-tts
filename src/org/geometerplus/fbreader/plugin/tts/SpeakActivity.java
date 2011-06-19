@@ -10,7 +10,6 @@ import android.speech.tts.TextToSpeech;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.view.View;
-import android.view.Window;
 
 import org.geometerplus.android.fbreader.api.*;
 
@@ -40,34 +39,6 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		}
 	};
 
-	private View.OnClickListener forwardListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			stopTalking();
-			nextParagraphString(false, SEARCHFORWARD);
-		}
-	};
-
-	private View.OnClickListener backListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			stopTalking();
-			nextParagraphString(false, SEARCHBACKWARD);
-		}
-	};
-
-	private View.OnClickListener pauseListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			stopTalking();
-			myIsActive = false;
-		}
-	};
-
-	private View.OnClickListener stopListener = new View.OnClickListener() {
-		public void onClick(View v) {
-			stopTalking();
-			finish();
-		}
-	};
-
 	private void setListener(int id, View.OnClickListener listener) {
 		findViewById(id).setOnClickListener(listener);
 	}
@@ -78,14 +49,33 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 		myApi = new ApiServiceConnection(this);
 
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.control_panel);
 
-		findViewById(R.id.button_previous_paragraph).setOnClickListener(backListener);
-		findViewById(R.id.button_next_paragraph).setOnClickListener(forwardListener);
-		findViewById(R.id.button_close).setOnClickListener(stopListener);
-		findViewById(R.id.button_pause).setOnClickListener(pauseListener);
-		findViewById(R.id.button_play).setOnClickListener(new View.OnClickListener() {
+		setListener(R.id.button_previous_paragraph, new View.OnClickListener() {
+			public void onClick(View v) {
+				stopTalking();
+				nextParagraphString(false, SEARCHBACKWARD);
+			}
+		});
+		setListener(R.id.button_next_paragraph, new View.OnClickListener() {
+			public void onClick(View v) {
+				stopTalking();
+				nextParagraphString(false, SEARCHFORWARD);
+			}
+		});
+		setListener(R.id.button_close, new View.OnClickListener() {
+			public void onClick(View v) {
+				stopTalking();
+				finish();
+			}
+		});
+		setListener(R.id.button_pause, new View.OnClickListener() {
+			public void onClick(View v) {
+				stopTalking();
+				myIsActive = false;
+			}
+		});
+		setListener(R.id.button_play, new View.OnClickListener() {
 			public void onClick(View v) {
 				setActive(true);
 				if (myIsActive) {
@@ -99,9 +89,10 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		TelephonyManager tm = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
 		tm.listen(mPhoneListener, PhoneStateListener.LISTEN_CALL_STATE);
 
-		Intent checkIntent = new Intent();
-		checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-		startActivityForResult(checkIntent, CHECK_TTS_INSTALLED);
+		startActivityForResult(
+			new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA),
+			CHECK_TTS_INSTALLED
+		);
 	}
 
 	@Override
@@ -205,8 +196,8 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 	@Override
 	protected void onDestroy() {
-		setActive(false);
 		if (myTTS != null) {
+			setActive(false);
 			myTTS.shutdown();
 		}
 		super.onDestroy();
@@ -234,14 +225,16 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	}
 
 	@Override
-	public void onBackPressed() {
-		stopTalking();
-		super.onBackPressed();
-	}
-
-	@Override
 	public void onInit(int status) {
 		myTTS.setOnUtteranceCompletedListener(this);
+		try {
+			setTitle(myApi.getBookTitle());
+		} catch (ApiException e) {
+			e.printStackTrace();
+			finish();
+			return;
+		}
+
 		try {
 			Locale locale = new Locale(myApi.getBookLanguage());
 			if (myTTS.isLanguageAvailable(locale) < 0) {
