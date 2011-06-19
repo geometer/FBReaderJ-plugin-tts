@@ -42,6 +42,17 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		findViewById(id).setOnClickListener(listener);
 	}
 
+	private void highlightParagraph() throws ApiException {
+		if (0 <= myParagraphIndex && myParagraphIndex < myParagraphsNumber) {
+			myApi.highlightArea(
+				new TextPosition(myParagraphIndex, 0, 0),
+				new TextPosition(myParagraphIndex, Integer.MAX_VALUE, 0)
+			);
+		} else {
+			myApi.clearHighlighting();
+		}
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -58,6 +69,8 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 					if (myApi.getPageStart().ParagraphIndex >= myParagraphIndex) {
 						myApi.setPageStart(new TextPosition(myParagraphIndex, 0, 0));
 					}
+					highlightParagraph();
+					findViewById(R.id.button_next_paragraph).setEnabled(true);
 					findViewById(R.id.button_play).setEnabled(true);
 				} catch (ApiException e) {
 					e.printStackTrace();
@@ -152,7 +165,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	}
 
 	private boolean gotoNextParagraph() {
-		if (myParagraphIndex == -1 || myParagraphIndex == myParagraphsNumber - 1) {
+		if (myParagraphIndex == -1 || myParagraphIndex == myParagraphsNumber) {
 			return false;
 		}
 		++myParagraphIndex;
@@ -199,24 +212,24 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		}
 	}
 
-	private void scrollToCurrentParagraph() {
-	}
-
 	private void nextParagraphString(boolean speak, int direction) {
-		if (myParagraphIndex >= myParagraphsNumber - 1) {
-			stopTalking();
-			findViewById(R.id.button_play).setEnabled(false);
-			return;
-		}
-
 		String s = lookForValidParagraphString(direction);
 
 		try {
 			if (!myApi.isPageEndOfText()) {
 				myApi.setPageStart(new TextPosition(myParagraphIndex, 0, 0));
 			}
+			highlightParagraph();
 		} catch (ApiException e) {
 			e.printStackTrace();
+		}
+		if (myParagraphIndex >= myParagraphsNumber) {
+			runOnUiThread(new Runnable() {
+				public void run() {
+					findViewById(R.id.button_next_paragraph).setEnabled(false);
+					findViewById(R.id.button_play).setEnabled(false);
+				}
+			});
 		}
 		if (speak) {
 			speakString(s);
@@ -249,6 +262,11 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	@Override
 	protected void onStop() {
 		stopTalking();
+		try {
+			myApi.clearHighlighting();
+		} catch (ApiException e) {
+			e.printStackTrace();
+		}
 		myApi.disconnect();
 		super.onStop();
 	}
@@ -281,6 +299,9 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	public void onUtteranceCompleted(String uttId) {
 		if (myIsActive && UTTERANCE_ID.equals(uttId)) {
 			nextParagraphString(true, SEARCHFORWARD);
+			if (myParagraphIndex >= myParagraphsNumber) {
+				stopTalking();
+			}
 		} else {
 			setActive(false);
 		}
