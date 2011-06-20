@@ -33,7 +33,7 @@ import android.widget.Toast;
 
 import org.geometerplus.android.fbreader.api.*;
 
-public class SpeakActivity extends Activity implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener {
+public class SpeakActivity extends Activity implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener, ApiClientImplementation.ConnectionListener {
 	private Api myApi;
 
 	private static final String UTTERANCE_ID = "FBReaderTTSPlugin";
@@ -52,8 +52,6 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		myApi = new ApiClientImplementation(this);
 
 		setContentView(R.layout.control_panel);
 
@@ -102,7 +100,9 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		);
 
 		setActive(false);
+		setActionsEnabled(false);
 
+		myApi = new ApiClientImplementation(this, this);
 		startActivityForResult(
 			new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA), 0
 		);
@@ -148,8 +148,36 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		super.onDestroy();
 	}
 
-	@Override
+	private volatile int myInitializationStatus;
+	private static int API_INITIALIZED = 1;
+	private static int TTS_INITIALIZED = 2;
+	private static int FULLY_INITIALIZED = API_INITIALIZED | TTS_INITIALIZED;
+
+	public void onConnected() {
+		myInitializationStatus |= API_INITIALIZED;
+		if (myInitializationStatus == FULLY_INITIALIZED) {
+			doFinalInitialization();
+		}
+	}
+
 	public void onInit(int status) {
+		myInitializationStatus |= TTS_INITIALIZED;
+		if (myInitializationStatus == FULLY_INITIALIZED) {
+			doFinalInitialization();
+		}
+	}
+
+	private void setActionsEnabled(final boolean enabled) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				findViewById(R.id.button_previous_paragraph).setEnabled(enabled);
+				findViewById(R.id.button_next_paragraph).setEnabled(enabled);
+				findViewById(R.id.button_play).setEnabled(enabled);
+			}
+		});
+	}
+
+	private void doFinalInitialization() {
 		myTTS.setOnUtteranceCompletedListener(this);
 
 		try {
@@ -185,16 +213,11 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 			myParagraphIndex = myApi.getPageStart().ParagraphIndex;
 			myParagraphsNumber = myApi.getParagraphsNumber();
+			setActionsEnabled(true);
 			setActive(true);
 			speakString(gotoNextParagraph());
 		} catch (ApiException e) {
-			runOnUiThread(new Runnable() {
-				public void run() {
-					findViewById(R.id.button_previous_paragraph).setEnabled(false);
-					findViewById(R.id.button_next_paragraph).setEnabled(false);
-					findViewById(R.id.button_play).setEnabled(false);
-				}
-			});
+			setActionsEnabled(false);
 			showMessage(getText(R.string.initialization_error));
 			e.printStackTrace();
 		}
