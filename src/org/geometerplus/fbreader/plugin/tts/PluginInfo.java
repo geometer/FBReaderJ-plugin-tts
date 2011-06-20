@@ -19,19 +19,19 @@
 
 package org.geometerplus.fbreader.plugin.tts;
 
-import java.util.List;
-import java.util.Collections;
+import java.util.*;
 
+import android.content.*;
 import android.net.Uri;
 
 import org.geometerplus.android.fbreader.api.PluginApi;
 
-public class TestActivity extends PluginApi.TestActivity {
+public class PluginInfo extends PluginApi.PluginInfo {
 	@Override
-	protected List<PluginApi.ActionInfo> implementedActions() {
+	protected List<PluginApi.ActionInfo> implementedActions(Context context) {
 		return Collections.singletonList(new PluginApi.ActionInfo(
 			Uri.parse("http://data.fbreader.org/plugin/tts/speak"),
-			getText(R.string.speak_menu_item).toString()
+			context.getText(R.string.speak_menu_item).toString()
 		));
 	}
 }
