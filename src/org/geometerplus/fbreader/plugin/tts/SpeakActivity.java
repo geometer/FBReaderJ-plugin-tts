@@ -154,16 +154,20 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	private static int FULLY_INITIALIZED = API_INITIALIZED | TTS_INITIALIZED;
 
 	public void onConnected() {
-		myInitializationStatus |= API_INITIALIZED;
-		if (myInitializationStatus == FULLY_INITIALIZED) {
-			doFinalInitialization();
+		if (myInitializationStatus != FULLY_INITIALIZED) {
+			myInitializationStatus |= API_INITIALIZED;
+			if (myInitializationStatus == FULLY_INITIALIZED) {
+				doFinalInitialization();
+			}
 		}
 	}
 
 	public void onInit(int status) {
-		myInitializationStatus |= TTS_INITIALIZED;
-		if (myInitializationStatus == FULLY_INITIALIZED) {
-			doFinalInitialization();
+		if (myInitializationStatus != FULLY_INITIALIZED) {
+			myInitializationStatus |= TTS_INITIALIZED;
+			if (myInitializationStatus == FULLY_INITIALIZED) {
+				doFinalInitialization();
+			}
 		}
 	}
 
