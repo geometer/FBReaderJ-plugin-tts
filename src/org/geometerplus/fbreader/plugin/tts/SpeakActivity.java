@@ -34,7 +34,7 @@ import android.widget.Toast;
 import org.geometerplus.android.fbreader.api.*;
 
 public class SpeakActivity extends Activity implements TextToSpeech.OnInitListener, TextToSpeech.OnUtteranceCompletedListener, ApiClientImplementation.ConnectionListener {
-	private Api myApi;
+	private ApiClientImplementation myApi;
 
 	private static final String UTTERANCE_ID = "FBReaderTTSPlugin";
 
