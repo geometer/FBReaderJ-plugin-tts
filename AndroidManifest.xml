@@ -5,13 +5,14 @@
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 	<application android:label="@string/title" android:icon="@drawable/fbreader_plugin">
-		<receiver android:name="org.geometerplus.fbreader.plugin.tts.PluginInfo">
+		<receiver android:name=".PluginInfo">
 			<intent-filter>
 				<action android:name="android.fbreader.action.plugin.REGISTER" />
 				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.INFO" />
 			</intent-filter>
 		</receiver>
-		<activity android:name="org.geometerplus.fbreader.plugin.tts.SpeakActivity" android:configChanges="orientation|keyboardHidden" android:theme="@android:style/Theme.Dialog">
+		<activity android:name=".SpeakActivity" android:configChanges="orientation|keyboardHidden" android:theme="@android:style/Theme.Dialog">
 			<intent-filter>
 				<action android:name="android.fbreader.action.plugin.RUN" />
 				<category android:name="android.intent.category.DEFAULT" />

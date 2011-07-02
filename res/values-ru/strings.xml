@@ -2,6 +2,7 @@
 <resources>
 	<string name="title">FBReader TTS plugin</string>
 	<string name="speak_menu_item">Читать вслух</string>
+	<string name="no_tts_installed">Не могу найти движок text-to-speech на устройстве.</string>
 	<string name="initialization_error">Не удалось получить информацию о книге от FBReader.</string>
 	<string name="language_is_not_set">Язык книги не указан. Используем для чтения %0 язык.</string>
 	<string name="no_data_for_language" formatted="false">Данные для языка &quot;%0&quot; не установлены. Используем для чтения %1 язык.</string>

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
@@ -103,9 +104,13 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		setActionsEnabled(false);
 
 		myApi = new ApiClientImplementation(this, this);
-		startActivityForResult(
-			new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA), 0
-		);
+		try {
+			startActivityForResult(
+				new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA), 0
+			);
+		} catch (ActivityNotFoundException e) {
+			showMessage(getText(R.string.no_tts_installed));
+		}
 	}
 
 	@Override
@@ -187,7 +192,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		try {
 			setTitle(myApi.getBookTitle());
 
-			Locale locale;
+			Locale locale = null;
 			final String language = myApi.getBookLanguage();
 			if ("other".equals(language)) {
 				locale = Locale.getDefault();
@@ -199,8 +204,12 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 						.replace("%0", locale.getDisplayLanguage())
 				);
 			} else {
-				locale = new Locale(myApi.getBookLanguage());
-				if (myTTS.isLanguageAvailable(locale) < 0) {
+				final String languageCode = myApi.getBookLanguage();
+				try {
+					locale = new Locale(languageCode);
+				} catch (Exception e) {
+				}
+				if (locale == null || myTTS.isLanguageAvailable(locale) < 0) {
 					final Locale originalLocale = locale;
 					locale = Locale.getDefault();
 					if (myTTS.isLanguageAvailable(locale) < 0) {
@@ -208,7 +217,8 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 					}
 					showMessage(
 						getText(R.string.no_data_for_language).toString()
-							.replace("%0", originalLocale.getDisplayLanguage())
+							.replace("%0", originalLocale != null
+								? originalLocale.getDisplayLanguage() : languageCode)
 							.replace("%1", locale.getDisplayLanguage())
 					);
 				}
