@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.speech.tts.TextToSpeech;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -276,7 +277,9 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		});
 	}
 
-	private void setActive(final boolean active) {
+	private volatile PowerManager.WakeLock myWakeLock;
+
+	private synchronized void setActive(final boolean active) {
 		myIsActive = active;
 
 		runOnUiThread(new Runnable() {
@@ -285,6 +288,20 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 				findViewById(R.id.button_pause).setVisibility(active ? View.VISIBLE : View.GONE);
 			}
 		});
+
+		if (active) {
+			if (myWakeLock == null) {
+				myWakeLock =
+					((PowerManager)getSystemService(POWER_SERVICE))
+						.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "FBReader TTS plugin");
+				myWakeLock.acquire();
+			}
+		} else {
+			if (myWakeLock != null) {
+				myWakeLock.release();
+				myWakeLock = null;
+			}
+		}
 	}
 
 	private void speakString(String text) {
