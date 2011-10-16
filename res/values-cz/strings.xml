@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="title">Doplnìk TTS pro FBReader</string>
-	<string name="speak_menu_item">Pøedèítat</string>
-	<string name="no_tts_installed">Nelze se pøipojit k modulu TTS ve vašem zaøízení.</string>
-	<string name="initialization_error">Nelze získat data knihy z FBReaderu.</string>
-	<string name="language_is_not_set">Jazyk knihy není nastaven. Pokus o ètení knihy v jazyce %0.</string>
-	<string name="no_data_for_language" formatted="false">Data pøevodu textu na øeè pro jazyk %0 nejsou nainstalována. Pokus o ètení knihy v jazyce %1.</string>
+	<string name="title">DoplnÄ›k TTS pro FBReader</string>
+	<string name="speak_menu_item">PÅ™edÄÃ­tat</string>
+	<string name="no_tts_installed">Nelze se pÅ™ipojit k modulu TTS ve vaÂšem zaÅ™Ã­zenÃ­.</string>
+	<string name="initialization_error">Nelze zÃ­skat data knihy z FBReaderu.</string>
+	<string name="language_is_not_set">Jazyk knihy nenÃ­ nastaven. Pokus o ÄtenÃ­ knihy v jazyce %0.</string>
+	<string name="no_data_for_language" formatted="false">Data pÅ™evodu textu na Å™eÄ pro jazyk %0 nejsou nainstalovÃ¡na. Pokus o ÄtenÃ­ knihy v jazyce %1.</string>
 </resources>
