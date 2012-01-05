@@ -110,7 +110,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 				new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA), 0
 			);
 		} catch (ActivityNotFoundException e) {
-			showMessage(getText(R.string.no_tts_installed));
+			showErrorMessage(getText(R.string.no_tts_installed), true);
 		}
 
 		setTitle(R.string.initializing);
@@ -204,9 +204,10 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 				if (myTTS.isLanguageAvailable(locale) < 0) {
 					locale = Locale.ENGLISH;
 				}
-				showMessage(
+				showErrorMessage(
 					getText(R.string.language_is_not_set).toString()
-						.replace("%0", locale.getDisplayLanguage())
+						.replace("%0", locale.getDisplayLanguage()),
+					false
 				);
 			} else {
 				final String languageCode = myApi.getBookLanguage();
@@ -220,11 +221,12 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 					if (myTTS.isLanguageAvailable(locale) < 0) {
 						locale = Locale.ENGLISH;
 					}
-					showMessage(
+					showErrorMessage(
 						getText(R.string.no_data_for_language).toString()
 							.replace("%0", originalLocale != null
 								? originalLocale.getDisplayLanguage() : languageCode)
-							.replace("%1", locale.getDisplayLanguage())
+							.replace("%1", locale.getDisplayLanguage()),
+						false
 					);
 				}
 			}
@@ -237,7 +239,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 			speakString(gotoNextParagraph());
 		} catch (ApiException e) {
 			setActionsEnabled(false);
-			showMessage(getText(R.string.initialization_error));
+			showErrorMessage(getText(R.string.initialization_error), true);
 			e.printStackTrace();
 		}
 	}
@@ -273,10 +275,12 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		}
 	}
 
-	private void showMessage(final CharSequence text) {
+	private void showErrorMessage(final CharSequence text, final boolean fatal) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				setTitle(R.string.failure);
+				if (fatal) {
+					setTitle(R.string.failure);
+				}
 				Toast.makeText(SpeakActivity.this, text, Toast.LENGTH_SHORT).show();
 			}
 		});
