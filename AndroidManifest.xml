@@ -12,7 +12,7 @@
 				<category android:name="android.intent.category.INFO" />
 			</intent-filter>
 		</receiver>
-		<activity android:name=".SpeakActivity" android:configChanges="orientation|keyboardHidden" android:theme="@android:style/Theme.Dialog">
+		<activity android:name=".SpeakActivity" android:configChanges="orientation|keyboardHidden" android:theme="@android:style/Theme.Holo.Dialog">
 			<intent-filter>
 				<action android:name="android.fbreader.action.plugin.RUN" />
 				<category android:name="android.intent.category.DEFAULT" />
