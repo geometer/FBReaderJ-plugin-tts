@@ -7,26 +7,26 @@
     <ImageButton android:id="@+id/button_previous_paragraph"
             android:layout_width="70dip"
             android:layout_height="50dip"
-            android:src="@android:drawable/ic_media_previous"
+            android:src="@drawable/media_skip_backward"
 		/> 
     <ImageButton android:id="@+id/button_play"
             android:layout_width="70dip"
             android:layout_height="50dip"
-            android:src="@android:drawable/ic_media_play"
+            android:src="@drawable/media_playback_start"
     />
     <ImageButton android:id="@+id/button_pause"
             android:layout_width="70dip"
             android:layout_height="50dip"
-            android:src="@android:drawable/ic_media_pause"
+            android:src="@drawable/media_playback_pause"
     />
     <ImageButton android:id="@+id/button_next_paragraph"
             android:layout_width="70dip"
             android:layout_height="50dip"
-            android:src="@android:drawable/ic_media_next"
+            android:src="@drawable/media_skip_forward"
     />
     <ImageButton android:id="@+id/button_close"
             android:layout_width="70dip"
             android:layout_height="50dip"
-            android:src="@android:drawable/ic_notification_clear_all"
+            android:src="@drawable/media_playback_stop"
     />
 </LinearLayout>
