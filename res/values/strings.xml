@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="title">FBReader TTS plugin</string>
+	<string name="initializing">Initializing&#8230;</string>
+	<string name="failure">Initialization failed, sorry</string>
 	<string name="speak_menu_item">Speak</string>
 	<string name="no_tts_installed">Could not connect TTS engine on your device.</string>
 	<string name="initialization_error">Could not get book data from FBReader.</string>

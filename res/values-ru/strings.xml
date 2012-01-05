@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="title">FBReader TTS plugin</string>
+	<string name="initializing">Инициализация&#8230;</string>
+	<string name="failure">Ошибка инициализации</string>
 	<string name="speak_menu_item">Читать вслух</string>
 	<string name="no_tts_installed">Не могу найти движок text-to-speech на устройстве.</string>
 	<string name="initialization_error">Не удалось получить информацию о книге от FBReader.</string>

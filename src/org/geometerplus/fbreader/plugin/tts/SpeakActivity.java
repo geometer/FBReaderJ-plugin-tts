@@ -112,6 +112,8 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		} catch (ActivityNotFoundException e) {
 			showMessage(getText(R.string.no_tts_installed));
 		}
+
+		setTitle(R.string.initializing);
 	}
 
 	@Override
@@ -159,6 +161,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	private static int TTS_INITIALIZED = 2;
 	private static int FULLY_INITIALIZED = API_INITIALIZED | TTS_INITIALIZED;
 
+	// implements ApiClientImplementation.ConnectionListener
 	public void onConnected() {
 		if (myInitializationStatus != FULLY_INITIALIZED) {
 			myInitializationStatus |= API_INITIALIZED;
@@ -168,6 +171,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		}
 	}
 
+	// implements TextToSpeech.OnInitListener
 	public void onInit(int status) {
 		if (myInitializationStatus != FULLY_INITIALIZED) {
 			myInitializationStatus |= TTS_INITIALIZED;
@@ -272,6 +276,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	private void showMessage(final CharSequence text) {
 		runOnUiThread(new Runnable() {
 			public void run() {
+				setTitle(R.string.failure);
 				Toast.makeText(SpeakActivity.this, text, Toast.LENGTH_SHORT).show();
 			}
 		});
