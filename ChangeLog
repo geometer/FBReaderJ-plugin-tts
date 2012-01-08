@@ -1,3 +1,4 @@
-===== 1.0.1 (Aug ??, 2011) =====
+===== 1.1 (Jan 8, 2012) =====
 * Wakelock: don't stop reading in auto mode
 * Czech localization (by Marek Pavelka)
+* Separate packages for Android 1.6/2 and Anroid 3+
