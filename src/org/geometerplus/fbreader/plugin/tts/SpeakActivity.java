@@ -74,7 +74,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		});
 		setListener(R.id.button_close, new View.OnClickListener() {
 			public void onClick(View v) {
-				stopTalking();
+				switchOff();
 				finish();
 			}
 		});
@@ -121,7 +121,11 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
 			myTTS = new TextToSpeech(this, this);
 		} else {
-			startActivity(new Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA));
+			try {
+				startActivity(new Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA));
+			} catch (ActivityNotFoundException e) {
+				showErrorMessage(getText(R.string.no_tts_installed), true);
+			}
 		}
 	}
 
@@ -136,8 +140,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		super.onPause();
 	}
 
-	@Override
-	protected void onStop() {
+	private void switchOff() {
 		stopTalking();
 		try {
 			myApi.clearHighlighting();
@@ -145,14 +148,15 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 			e.printStackTrace();
 		}
 		myApi.disconnect();
-		super.onStop();
+		if (myTTS != null) {
+			myTTS.shutdown();
+			myTTS = null;
+		}
 	}
 
 	@Override
 	protected void onDestroy() {
-		if (myTTS != null) {
-			myTTS.shutdown();
-		}
+		switchOff();
 		super.onDestroy();
 	}
 
