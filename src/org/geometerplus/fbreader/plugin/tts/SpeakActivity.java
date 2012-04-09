@@ -23,8 +23,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
+import android.content.*;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.speech.tts.TextToSpeech;
@@ -32,6 +31,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Toast;
+import android.widget.SeekBar;
 
 import org.geometerplus.android.fbreader.api.*;
 
@@ -41,6 +41,8 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	private static final String UTTERANCE_ID = "FBReaderTTSPlugin";
 
 	private TextToSpeech myTTS;
+
+	private SharedPreferences myPreferences;
 
 	private int myParagraphIndex = -1;
 	private int myParagraphsNumber;
@@ -54,6 +56,8 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		myPreferences = getSharedPreferences("FBReaderTTS", MODE_PRIVATE);
 
 		setContentView(R.layout.control_panel);
 
@@ -89,6 +93,27 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 				speakString(gotoNextParagraph());
 			}
 		});
+		final SeekBar speedControl = (SeekBar)findViewById(R.id.speed_control);
+		speedControl.setMax(200);
+		speedControl.setProgress(myPreferences.getInt("rate", 100));
+		speedControl.setEnabled(false);
+		speedControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+			private SharedPreferences.Editor myEditor = myPreferences.edit();
+
+			public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+				if (myTTS != null) {
+					setSpeechRate(progress);
+					myEditor.putInt("rate", progress);
+				}
+			}
+
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
+
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				myEditor.commit();
+			}
+		});
 
 		((TelephonyManager)getSystemService(TELEPHONY_SERVICE)).listen(
 			new PhoneStateListener() {
@@ -114,6 +139,12 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		}
 
 		setTitle(R.string.initializing);
+	}
+
+	private void setSpeechRate(int progress) {
+		if (myTTS != null) {
+			myTTS.setSpeechRate((float)Math.pow(2.0, (progress - 100.0) / 75));
+		}
 	}
 
 	@Override
@@ -170,7 +201,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		if (myInitializationStatus != FULLY_INITIALIZED) {
 			myInitializationStatus |= API_INITIALIZED;
 			if (myInitializationStatus == FULLY_INITIALIZED) {
-				doFinalInitialization();
+				onInitializationCompleted();
 			}
 		}
 	}
@@ -180,7 +211,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		if (myInitializationStatus != FULLY_INITIALIZED) {
 			myInitializationStatus |= TTS_INITIALIZED;
 			if (myInitializationStatus == FULLY_INITIALIZED) {
-				doFinalInitialization();
+				onInitializationCompleted();
 			}
 		}
 	}
@@ -195,7 +226,7 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		});
 	}
 
-	private void doFinalInitialization() {
+	private void onInitializationCompleted() {
 		myTTS.setOnUtteranceCompletedListener(this);
 
 		try {
@@ -235,6 +266,10 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 				}
 			}
 			myTTS.setLanguage(locale);
+
+			final SeekBar speedControl = (SeekBar)findViewById(R.id.speed_control);
+			speedControl.setEnabled(true);
+			setSpeechRate(speedControl.getProgress());
 
 			myParagraphIndex = myApi.getPageStart().ParagraphIndex;
 			myParagraphsNumber = myApi.getParagraphsNumber();
