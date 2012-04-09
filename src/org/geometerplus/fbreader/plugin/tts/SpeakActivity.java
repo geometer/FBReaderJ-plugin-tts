@@ -233,8 +233,8 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 			setTitle(myApi.getBookTitle());
 
 			Locale locale = null;
-			final String language = myApi.getBookLanguage();
-			if ("other".equals(language)) {
+			final String languageCode = myApi.getBookLanguage();
+			if ("other".equals(languageCode)) {
 				locale = Locale.getDefault();
 				if (myTTS.isLanguageAvailable(locale) < 0) {
 					locale = Locale.ENGLISH;
@@ -245,7 +245,6 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 					false
 				);
 			} else {
-				final String languageCode = myApi.getBookLanguage();
 				try {
 					locale = new Locale(languageCode);
 				} catch (Exception e) {
