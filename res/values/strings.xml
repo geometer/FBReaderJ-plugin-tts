@@ -8,5 +8,5 @@
 	<string name="initialization_error">Could not get book data from FBReader.</string>
 	<string name="language_is_not_set">Book language is not set. Trying to read book in %0.</string>
 	<string name="no_data_for_language" formatted="false">Text-to-speech data for %0 are not installed. Trying to read book in %1.</string>
-	<string name="speed">Speed:</string>
+	<string name="speed">Rate:</string>
 </resources>
