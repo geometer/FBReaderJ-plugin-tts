@@ -226,6 +226,18 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		});
 	}
 
+	private String getDisplayLanguage(Locale locale, String defaultValue) {
+		if (locale == null) {
+			return defaultValue;
+		}
+		String language = locale.getDisplayLanguage();
+		if (language != null) {
+			return language;
+		}
+		language = locale.getLanguage();
+		return language != null ? language : defaultValue;
+	}
+
 	private void onInitializationCompleted() {
 		myTTS.setOnUtteranceCompletedListener(this);
 
@@ -234,14 +246,14 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 
 			Locale locale = null;
 			final String languageCode = myApi.getBookLanguage();
-			if ("other".equals(languageCode)) {
+			if (languageCode == null || "other".equals(languageCode)) {
 				locale = Locale.getDefault();
 				if (myTTS.isLanguageAvailable(locale) < 0) {
 					locale = Locale.ENGLISH;
 				}
 				showErrorMessage(
 					getText(R.string.language_is_not_set).toString()
-						.replace("%0", locale.getDisplayLanguage()),
+						.replace("%0", getDisplayLanguage(locale, "???")),
 					false
 				);
 			} else {
@@ -257,9 +269,8 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 					}
 					showErrorMessage(
 						getText(R.string.no_data_for_language).toString()
-							.replace("%0", originalLocale != null
-								? originalLocale.getDisplayLanguage() : languageCode)
-							.replace("%1", locale.getDisplayLanguage()),
+							.replace("%0", getDisplayLanguage(originalLocale, languageCode))
+							.replace("%1", getDisplayLanguage(locale, "???")),
 						false
 					);
 				}
