@@ -11,10 +11,20 @@
 				<category android:name="android.intent.category.DEFAULT" />
 				<category android:name="android.intent.category.INFO" />
 			</intent-filter>
+			<intent-filter>
+				<action android:name="com.fbreader.action.plugin.REGISTER" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.INFO" />
+			</intent-filter>
 		</receiver>
 		<activity android:name=".SpeakActivity" android:configChanges="orientation|keyboardHidden" android:theme="@android:style/Theme.Dialog">
 			<intent-filter>
 				<action android:name="android.fbreader.action.plugin.RUN" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:host="data.fbreader.org" android:scheme="http" android:path="/plugin/tts/speak" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="com.fbreader.action.plugin.RUN" />
 				<category android:name="android.intent.category.DEFAULT" />
 				<data android:host="data.fbreader.org" android:scheme="http" android:path="/plugin/tts/speak" />
 			</intent-filter>

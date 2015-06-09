@@ -129,7 +129,15 @@ public class SpeakActivity extends Activity implements TextToSpeech.OnInitListen
 		setActive(false);
 		setActionsEnabled(false);
 
-		myApi = new ApiClientImplementation(this, this);
+		String prefix = ApiClientImplementation.FBREADER_PREFIX;
+		final Intent intent = getIntent();
+		if (intent != null) {
+			final String action = getIntent().getAction();
+			if (action != null && action.endsWith(PluginApi.ACTION_RUN_POSTFIX)) {
+				prefix = action.substring(0, action.length() - PluginApi.ACTION_RUN_POSTFIX.length());
+			}
+		}
+		myApi = new ApiClientImplementation(this, this, prefix);
 		try {
 			startActivityForResult(
 				new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA), 0

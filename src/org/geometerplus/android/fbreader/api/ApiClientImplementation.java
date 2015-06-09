@@ -14,13 +14,16 @@ public class ApiClientImplementation implements ServiceConnection, Api, ApiMetho
 		void onConnected();
 	}
 
-	private static final String ACTION_API = "android.fbreader.action.API";
-	static final String ACTION_API_CALLBACK = "android.fbreader.action.API_CALLBACK";
+	public static final String FBREADER_PREFIX = "android.fbreader";
+	public static final String FBREADER_PREMIUM_PREFIX = "com.fbreader";
+	private static final String ACTION_API_POSTFIX = ".action.API";
+	static final String ACTION_API_CALLBACK_POSTFIX = ".action.API_CALLBACK";
 	static final String EVENT_TYPE = "event.type";
 
 	private final Context myContext;
 	private ConnectionListener myListener;
 	private volatile ApiInterface myInterface;
+	private final String myPrefix;
 
 	private final List<ApiListener> myApiListeners =
 		Collections.synchronizedList(new LinkedList<ApiListener>());
@@ -42,16 +45,17 @@ public class ApiClientImplementation implements ServiceConnection, Api, ApiMetho
 		}
 	};
 
-	public ApiClientImplementation(Context context, ConnectionListener listener) {
+	public ApiClientImplementation(Context context, ConnectionListener listener, String prefix) {
 		myContext = context;
 		myListener = listener;
+		myPrefix = prefix;
 		connect();
 	}
 
 	public synchronized void connect() {
 		if (myInterface == null) {
-			myContext.bindService(new Intent(ACTION_API), this, Context.BIND_AUTO_CREATE);
-			myContext.registerReceiver(myEventReceiver, new IntentFilter(ACTION_API_CALLBACK));
+			myContext.bindService(new Intent(myPrefix + ACTION_API_POSTFIX), this, Context.BIND_AUTO_CREATE);
+			myContext.registerReceiver(myEventReceiver, new IntentFilter(myPrefix + ACTION_API_CALLBACK_POSTFIX));
 		}
 	}
 
